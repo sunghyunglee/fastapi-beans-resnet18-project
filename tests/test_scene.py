@@ -113,7 +113,7 @@ def test_v2_api(monkeypatch):
 
 
 def test_router_dense_canopy_is_far():
-    """큰 잎이 없어도 (whole 0) 작은 잎이 화면을 빽빽이 덮으면 원거리 → 잎마다 분류."""
+    """큰 잎이 없어도 (whole 0) 작은 잎이 화면을 빽빽이 덮으면 원거리 → 조각 확률 평균."""
     for seed in range(3):
         scene = analyze_scene(dense_image(seed))
         assert scene.whole_leaves == 0
