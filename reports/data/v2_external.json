@@ -24,23 +24,24 @@
       "v2": {
         "model": "full_aug_strong",
         "mode": "close",
+        "parts": 1,
         "decision": "DISEASE",
-        "counts": {
-          "bean_rust": 1
-        },
-        "leaves": [
+        "label": "bean_rust",
+        "score": 0.9946,
+        "all": [
           {
-            "no": 1,
             "label": "bean_rust",
-            "score": 0.9946,
-            "check": false
+            "score": 0.9946
+          },
+          {
+            "label": "angular_leaf_spot",
+            "score": 0.0054
+          },
+          {
+            "label": "healthy",
+            "score": 0.0
           }
-        ],
-        "average": {
-          "angular_leaf_spot": 0.0054,
-          "bean_rust": 0.9946,
-          "healthy": 0.0
-        }
+        ]
       }
     },
     {
@@ -66,66 +67,24 @@
       "v2": {
         "model": "full_aug_strong",
         "mode": "far",
-        "decision": "CHECK",
-        "counts": {
-          "healthy": 7,
-          "CHECK": 1
-        },
-        "leaves": [
+        "parts": 8,
+        "decision": "HEALTHY",
+        "label": "healthy",
+        "score": 0.7831,
+        "all": [
           {
-            "no": 1,
             "label": "healthy",
-            "score": 0.6868,
-            "check": false
+            "score": 0.7831
           },
           {
-            "no": 2,
-            "label": "healthy",
-            "score": 0.7389,
-            "check": false
+            "label": "angular_leaf_spot",
+            "score": 0.1616
           },
           {
-            "no": 3,
-            "label": "healthy",
-            "score": 0.7984,
-            "check": false
-          },
-          {
-            "no": 4,
-            "label": "healthy",
-            "score": 0.8526,
-            "check": false
-          },
-          {
-            "no": 5,
-            "label": "healthy",
-            "score": 0.4212,
-            "check": true
-          },
-          {
-            "no": 6,
-            "label": "healthy",
-            "score": 0.8625,
-            "check": false
-          },
-          {
-            "no": 7,
-            "label": "healthy",
-            "score": 0.9177,
-            "check": false
-          },
-          {
-            "no": 8,
-            "label": "healthy",
-            "score": 0.9868,
-            "check": false
+            "label": "bean_rust",
+            "score": 0.0552
           }
-        ],
-        "average": {
-          "angular_leaf_spot": 0.1616,
-          "bean_rust": 0.0552,
-          "healthy": 0.7831
-        }
+        ]
       }
     }
   ]

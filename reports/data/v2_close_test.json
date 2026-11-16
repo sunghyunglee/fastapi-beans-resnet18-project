@@ -12,59 +12,28 @@
     "leaf_ratio": 0.644,
     "largest_hull": 0.066,
     "similar": 1,
-    "whole_leaves": 0,
-    "boxes": [
-      [
-        229,
-        319,
-        435,
-        480
-      ],
-      [
-        157,
-        346,
-        242,
-        462
-      ]
-    ],
-    "hulls": [
-      0.066,
-      0.021
-    ]
+    "whole_leaves": 0
   },
   "mode": "close",
-  "leaves": [
+  "parts": 1,
+  "label": "healthy",
+  "score": 0.9918,
+  "all": [
     {
-      "no": 1,
-      "box": [
-        229,
-        319,
-        435,
-        480
-      ],
       "label": "healthy",
-      "score": 0.9918,
-      "check": false,
-      "all": [
-        {
-          "label": "healthy",
-          "score": 0.9918145537376404
-        },
-        {
-          "label": "bean_rust",
-          "score": 0.007935457862913609
-        },
-        {
-          "label": "angular_leaf_spot",
-          "score": 0.0002499492256902158
-        }
-      ]
+      "score": 0.9918
+    },
+    {
+      "label": "bean_rust",
+      "score": 0.0079
+    },
+    {
+      "label": "angular_leaf_spot",
+      "score": 0.0002
     }
   ],
   "decision": "HEALTHY",
-  "inference_ms": 17.93,
-  "counts": {
-    "healthy": 1
-  },
-  "total_ms": 1069.34
+  "check": false,
+  "inference_ms": 23.1,
+  "total_ms": 1046.83
 }

@@ -11,7 +11,7 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 @router.post("/api/v2/classify/")
 def classify_v2(image: UploadFile = File(...), draw: bool = False):
-    """사진을 근접 / 원거리로 자동 판별하고, 원거리면 잎마다 잘라 분류한다 (v1 API 는 그대로)."""
+    """사진을 근접 / 원거리로 자동 판별해 사진 1장에 결과 1개를 낸다 (원거리는 조각 확률 평균 · 박스 없음 · v1 API 는 그대로)."""
     image_bytes = image.file.read(MAX_UPLOAD_BYTES + 1)
     if len(image_bytes) > MAX_UPLOAD_BYTES:
         raise HTTPException(status_code=413, detail="5MB 이하 파일만 허용합니다.")

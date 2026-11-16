@@ -14,44 +14,15 @@
     "leaf_ratio": 0.873,
     "largest_hull": 0.519,
     "similar": 1,
-    "whole_leaves": 1,
-    "boxes": [
-      [
-        0,
-        59,
-        480,
-        726
-      ],
-      [
-        168,
-        357,
-        480,
-        662
-      ],
-      [
-        103,
-        0,
-        372,
-        124
-      ],
-      [
-        32,
-        86,
-        170,
-        209
-      ]
-    ],
-    "hulls": [
-      0.519,
-      0.148,
-      0.062,
-      0.018
-    ]
+    "whole_leaves": 1
   },
   "mode": "close",
-  "leaves": [],
+  "parts": 0,
+  "label": null,
+  "score": null,
+  "all": [],
   "decision": "RETAKE",
+  "check": false,
   "inference_ms": null,
-  "counts": {},
-  "total_ms": 238.07
+  "total_ms": 228.09
 }

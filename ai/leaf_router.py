@@ -155,54 +155,31 @@ def analyze_scene(rgb: np.ndarray) -> Scene:
     return Scene(mode, round(leaf_ratio, 3), round(largest, 3), similar, whole, boxes, hulls)
 
 
-def _label_color(label: str | None):
-    """잎 결과 색 (BGR) · healthy 초록 · 병 빨강 · 애매(?) 주황 · 결과 없음 파랑."""
-    if not label:
-        return (230, 130, 30)
-    if label.rstrip().endswith("?"):
-        return (0, 150, 255)
-    return (60, 170, 60) if label.startswith("healthy") else (40, 40, 220)
+_DECISION_COLOR = {"HEALTHY": (60, 170, 60), "DISEASE": (40, 40, 220), "CHECK": (0, 150, 255),
+                   "RETAKE": (120, 120, 120), "NO_LEAF": (120, 120, 120)}
 
 
-def draw_scene(rgb: np.ndarray, scene: Scene, labels=None, quality: Quality | None = None) -> np.ndarray:
-    """판별 결과를 그린 BGR 영상 (화면 · 증빙용).
+def draw_result(rgb: np.ndarray, result: dict, blur: bool = True) -> np.ndarray:
+    """화면 · 증빙용 그림 · 분류 프로젝트라 **박스 · 번호 없이** 사진 전체에 결과 1개만 표시.
 
-    박스가 겹쳐도 읽히도록 사진에는 **번호 동그라미만** 그리고, 점수는 화면의 표 (leaves) 에서 본다.
-    색 = 결과 (healthy 초록 · 병 빨강 · 애매 주황). labels = 잎마다 "bean_rust 0.91" 같은 글자.
+    사진은 강하게 블러 (외부 사진 보호 · 결과 글자에 집중) · 테두리 색 = 판정
+    (초록 HEALTHY · 빨강 DISEASE · 주황 CHECK · 회색 RETAKE / NO_LEAF) · 아래 띠 = 판정 · 라벨 · 점수 · 경로
     """
     out = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR).copy()
     h, w = out.shape[:2]
-    t = max(2, round(max(h, w) / 400))
-    boxes = scene.boxes if scene.mode == "far" else scene.boxes[:1]
-    colors = [_label_color(labels[i] if labels and i < len(labels) else None) for i in range(len(boxes))]
-    for (x1, y1, x2, y2), c in zip(boxes, colors):
-        cv2.rectangle(out, (x1, y1), (x2, y2), c, t)
-
-    r = max(14, round(max(h, w) / 45))                  # 번호 동그라미 반지름
-    placed = []
-    for i, ((x1, y1, x2, y2), c) in enumerate(zip(boxes, colors)):
-        cx, cy = (x1 + x2) // 2, (y1 + y2) // 2          # 박스 가운데에서 시작
-        for step in range(40):                           # 다른 번호와 겹치면 조금씩 옮김
-            if all((cx - px) ** 2 + (cy - py) ** 2 >= (2.3 * r) ** 2 for px, py in placed):
-                break
-            cx += round(1.2 * r) if step % 2 == 0 else 0
-            cy += round(1.2 * r) if step % 2 == 1 else 0
-            if cx > x2 - r or cx > w - r:
-                cx = max(x1 + r, r)
-            if cy > y2 - r or cy > h - r:
-                cy = max(y1 + r, r)
-        placed.append((cx, cy))
-        cv2.circle(out, (cx, cy), r, (255, 255, 255), -1)
-        cv2.circle(out, (cx, cy), r, c, max(2, t))
-        text = str(i + 1)
-        fs = r / 22
-        (tw, th), _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, fs, max(2, t))
-        cv2.putText(out, text, (cx - tw // 2, cy + th // 2), cv2.FONT_HERSHEY_SIMPLEX, fs, c, max(2, t))
-
-    head = f"{scene.mode.upper()}  leaves {len(boxes)}"
-    if quality is not None and not quality.ok:
-        head = "RETAKE " + ",".join(quality.reasons) + "  |  " + head
-    bar = max(24, round(h / 22))
-    cv2.rectangle(out, (0, 0), (w, bar), (0, 0, 0), -1)
-    cv2.putText(out, head, (8, round(bar * 0.72)), cv2.FONT_HERSHEY_SIMPLEX, bar / 40, (255, 255, 255), max(1, t // 2))
+    if blur:
+        out = cv2.GaussianBlur(out, (0, 0), max(h, w) / 40)
+    color = _DECISION_COLOR.get(result.get("decision"), (120, 120, 120))
+    t = max(6, round(max(h, w) / 90))
+    cv2.rectangle(out, (0, 0), (w - 1, h - 1), color, t)
+    bar = max(34, round(h / 12))
+    cv2.rectangle(out, (0, h - bar), (w, h), (0, 0, 0), -1)
+    if result.get("label"):
+        text = f'{result["decision"]}  {result["label"]} {result["score"]:.2f}  ({result["mode"]})'
+    else:
+        text = f'{result.get("decision")}'
+    fs, th = bar / 42, max(2, bar // 16)
+    while fs > 0.3 and cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, fs, th)[0][0] > w - 24:   # 글자가 사진 폭에 맞게
+        fs *= 0.9
+    cv2.putText(out, text, (12, h - round(bar * 0.3)), cv2.FONT_HERSHEY_SIMPLEX, fs, color, th)
     return out

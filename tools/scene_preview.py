@@ -19,7 +19,7 @@ import cv2
 import numpy as np
 from PIL import Image
 
-from ai.leaf_router import analyze_scene, check_quality, draw_scene
+from ai.leaf_router import analyze_scene, check_quality, draw_result
 
 EXT = {".jpg", ".jpeg", ".png", ".webp"}
 
@@ -45,18 +45,18 @@ def main():
         q, s = check_quality(rgb), analyze_scene(rgb)
         route = "retake" if not q.ok else s.mode
         modes[route] += 1
-        rows.append({"file": str(p.relative_to(src)), "route": route, "mode": s.mode, "leaves": len(s.boxes),
+        rows.append({"file": str(p.relative_to(src)), "route": route, "mode": s.mode, "parts": len(s.boxes),
                      "largest_hull": s.largest_hull, "similar": s.similar, "whole_leaves": s.whole_leaves, "leaf_ratio": s.leaf_ratio,
                      "sharpness": q.sharpness, "brightness": q.brightness, "contrast": q.contrast,
                      "retake_reason": ",".join(q.reasons)})
-        cv2.imwrite(str(out_dir / (p.stem + ".jpg")), draw_scene(rgb, s, quality=q))
+        cv2.imwrite(str(out_dir / (p.stem + ".jpg")), draw_result(rgb, {"decision": route.upper(), "mode": s.mode}))   # 박스 없이 경로만
     with open(out_dir.with_suffix(".csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
         w.writeheader()
         w.writerows(rows)
     print(f"{src} · {len(rows)}장 · " + " · ".join(f"{k} {v}" for k, v in modes.most_common()))
     for r in rows[:40]:
-        print(f"  {r['file']:42} {r['route']:7} leaves {r['leaves']:2}  hull {r['largest_hull']:.2f}  similar {r['similar']}  whole {r['whole_leaves']}  {r['retake_reason']}")
+        print(f"  {r['file']:42} {r['route']:7} parts {r['parts']:2}  hull {r['largest_hull']:.2f}  similar {r['similar']}  whole {r['whole_leaves']}  {r['retake_reason']}")
     print(f"저장: {out_dir}/ · {out_dir.with_suffix('.csv')}")
 
 

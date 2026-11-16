@@ -1,0 +1,40 @@
+{
+  "model": "artifacts/beans_resnet18_full_aug",
+  "val_count": 133,
+  "modes": {
+    "close": 130,
+    "far": 3
+  },
+  "decisions": {
+    "DISEASE": 91,
+    "HEALTHY": 42
+  },
+  "v1_accuracy": 0.9774,
+  "v2_accuracy": 0.9774,
+  "v1_v2_same": 133,
+  "v2_changed": [],
+  "field": [
+    {
+      "file": "00_original.jpg",
+      "mode": "far",
+      "parts": 7,
+      "decision": "HEALTHY",
+      "label": "healthy",
+      "score": 0.8775,
+      "all": [
+        {
+          "label": "healthy",
+          "score": 0.8775
+        },
+        {
+          "label": "bean_rust",
+          "score": 0.1123
+        },
+        {
+          "label": "angular_leaf_spot",
+          "score": 0.0102
+        }
+      ]
+    }
+  ]
+}

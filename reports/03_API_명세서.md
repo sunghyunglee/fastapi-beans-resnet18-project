@@ -12,7 +12,7 @@
 | API-04 | GET | `/api/async/jobs/{job_id}/` | 정수 `job_id` | 200 | `job_id` · `status` · `model_id` · `top1` · `all` · `inference_ms` · `cache_hit` · `error_message` | 404 |
 | WEB-01 | GET | `/vision/sync/` | 없음 | 200 | 동기 화면 HTML | — |
 | WEB-02 | GET | `/vision/async/` | 없음 | 200 | 비동기 화면 HTML | — |
-| API-05 | POST | `/api/v2/classify/` | `multipart/form-data` · `image` · 쿼리 `draw` (선택) | 200 | `decision` · `mode` · `leaves` · `quality` · `scene` · `counts` · `inference_ms` | 400 · 413 · 422 |
+| API-05 | POST | `/api/v2/classify/` | `multipart/form-data` · `image` · 쿼리 `draw` (선택) | 200 | `decision` · `mode` · `label` · `score` · `all` · `parts` · `quality` · `scene` · `inference_ms` | 400 · 413 · 422 |
 | WEB-03 | GET | `/vision/scene/` | 없음 | 200 | v2 장면 분석 화면 HTML | — |
 
 - `202` = 작업 **접수** · 완료가 아님 → 완료는 API-04 의 `status: done`
@@ -117,7 +117,7 @@
 | API-02-T07 | image 필드 누락 | 422 | `evidence/err_422.png` |
 | API-02-T08 | Redis 정지 중 동기 요청 | 200 · cache_hit false (폴백) | `evidence/redis_down_sync.png` |
 | API-03-T02 | Redis 정지 중 비동기 접수 | 503 | `evidence/redis_down_503.png` |
-| API-05-T01 | 밭 사진 `00_original.jpg` | 200 · far · 잎 7장 · DISEASE (최종 모델 · 1장 bean_rust 0.66) | `evidence/v2_far_original.png` · `data/v2_far_original.json` |
+| API-05-T01 | 밭 사진 `00_original.jpg` | 200 · far · 7조각 평균 · HEALTHY 0.88 (최종 모델) | `evidence/v2_far_original.png` · `data/v2_far_original.json` |
 | API-05-T02 | `healthy_test.0.jpg` | 200 · close · HEALTHY 0.99 | `data/v2_close_test.json` |
 | API-05-T03 | `05_blur_gaussian.jpg` | 200 · RETAKE | `data/v2_retake_blur.json` |
 
@@ -128,24 +128,27 @@
 | 항목 | 내용 |
 |---|---|
 | 처리 함수 | `ai/router_v2.py` `classify_v2()` → `scene_service.classify_scene()` |
-| 요청 | `image` (API-02 와 같은 검증) · `draw=true` 이면 박스 그림 `image_jpg_base64` 포함 |
-| `decision` | `RETAKE` 품질 불합격 · `NO_LEAF` 잎 없음 · `DISEASE` 확실한 병 잎 1장 이상 · `CHECK` 잎 점수 0.5 미만 있음 · `HEALTHY` 전부 확실한 healthy |
-| `mode` | `close` 근접 (사진 전체 1회 분류) · `far` 원거리 (잎마다 잘라 분류) |
-| `leaves[]` | `no` · `box` (원본 좌표) · `label` · `score` · `check` · `all` |
+| 요청 | `image` (API-02 와 같은 검증) · `draw=true` 이면 결과 그림 `image_jpg_base64` 포함 (박스 · 번호 없음 · 사진 블러) |
+| `decision` | `RETAKE` 품질 불합격 · `NO_LEAF` 잎 없음 · `CHECK` 평균 1등 점수 0.5 미만 · `HEALTHY` 평균 1등 healthy · `DISEASE` 평균 1등 병해 |
+| `mode` | `close` 근접 (사진 전체 1회 분류) · `far` 원거리 (조각으로 잘라 분류 → 확률 평균) |
+| `label` · `score` · `all` | 사진 1장 결과 (조각 확률 평균 · 1등 라벨 · 점수 · 3클래스 점수) · `parts` = 조각 수 · `check` = 0.5 미만 여부 |
 | 캐시 · DB | 사용하지 않음 (v1 경로 그대로) |
 
-**응답 예 (Head-only 시점 실제 응답 · 밭 사진 · 일부)** · 최종 모델 응답 전체 → `data/v2_far_original.json`
+**응답 예 (최종 모델 실제 응답 · 밭 사진 `00_original.jpg`)** · 전체 → `data/v2_far_original.json`
 ```json
 {
-  "decision": "CHECK",
+  "model_id": "artifacts/beans_resnet18_full_aug",
   "mode": "far",
-  "quality": {"sharpness": 452.5, "brightness": 102.2, "contrast": 36.3, "ok": true},
-  "scene": {"largest_hull": 0.147, "similar": 5, "whole_leaves": 2},
-  "leaves": [
-    {"no": 1, "box": [167, 355, 480, 666], "label": "angular_leaf_spot", "score": 0.373, "check": true},
-    {"no": 4, "box": [0, 357, 214, 710], "label": "healthy", "score": 0.4351, "check": true}
+  "parts": 7,
+  "label": "healthy",
+  "score": 0.8775,
+  "all": [
+    {"label": "healthy", "score": 0.8775},
+    {"label": "bean_rust", "score": 0.1123},
+    {"label": "angular_leaf_spot", "score": 0.0102}
   ],
-  "counts": {"CHECK": 6},
-  "inference_ms": 91.34
+  "decision": "HEALTHY",
+  "check": false,
+  "inference_ms": 104.32
 }
 ```

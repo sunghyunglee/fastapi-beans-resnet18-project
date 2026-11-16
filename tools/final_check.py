@@ -3,7 +3,7 @@
 출력:
   reports/data/final_models.json   모델별 Val (학습 기록 + 다시 계산) · 선택 모델 · 선택 모델 Test 1회
   reports/data/v2_external.json    외부 사진: v1 (사진 전체 1번 분류 · 모델별) vs v2 (장면 분석 · 선택 모델)
-  reports/scene/final/*.jpg        외부 사진 v2 박스 그림 (Git 제외 · 발표 화면용)
+  reports/scene/final/*.jpg        외부 사진 v2 결과 그림 (박스 없음) (Git 제외 · 발표 화면용)
 규칙: 모델 선택은 Validation 으로만 · Test 는 선택이 끝난 뒤 선택 모델 1개만 1회 측정 (평가 개정본)
 """
 import json, os, sys, types
@@ -109,18 +109,14 @@ if photos:
     for i, p in enumerate(photos):
         s = classify_scene(p.read_bytes(), draw=True)
         (pics / (p.stem + ".jpg")).write_bytes(base64.b64decode(s.pop("image_jpg_base64") or b""))
-        leaves = s["leaves"]
-        avg = {c: round(float(np.mean([next(x["score"] for x in l["all"] if x["label"] == c) for l in leaves])), 4)
-               for c in CLASSES} if leaves else {}
         rows.append({"file": p.name,
                      "v1_whole_image": {k: {"label": max(v1[k][i], key=v1[k][i].get),
                                             "score": round(max(v1[k][i].values()), 4)} for k in v1},
-                     "v2": {"model": best, "mode": s["mode"], "decision": s["decision"], "counts": s["counts"],
-                            "leaves": [{"no": l["no"], "label": l["label"], "score": l["score"], "check": l["check"]} for l in leaves],
-                            "average": avg}})
+                     "v2": {"model": best, "mode": s["mode"], "parts": s["parts"], "decision": s["decision"],
+                            "label": s["label"], "score": s["score"], "all": s["all"]}})
         r = rows[-1]
         print(f"\n[{p.name}]  v1 " + " · ".join(f"{k} {v['label']} {v['score']:.2f}" for k, v in r["v1_whole_image"].items()))
-        print(f"  v2 {s['mode']} · 잎 {len(leaves)}장 · 판정 {s['decision']} · {s['counts']} · 평균 {avg}")
+        print(f"  v2 {s['mode']} · 조각 {s['parts']}개 평균 · 판정 {s['decision']} · {s['label']} {s['score']}")
     (OUT / "v2_external.json").write_text(json.dumps({"folder": "외부사진 (인터넷 사진 · 원본은 Git 제외)", "photos": rows},
                                                      ensure_ascii=False, indent=2), encoding="utf-8")
 print("\n저장: reports/data/final_models.json · reports/data/v2_external.json · reports/scene/final/")

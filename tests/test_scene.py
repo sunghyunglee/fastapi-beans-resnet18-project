@@ -90,12 +90,11 @@ def test_quality_gate():
 
 
 def test_decision_rules():
-    sick = {"label": "bean_rust", "check": False}
-    unsure = {"label": "healthy", "check": True}
-    fine = {"label": "healthy", "check": False}
-    assert scene_service._decide([fine, sick]) == "DISEASE"
-    assert scene_service._decide([fine, unsure]) == "CHECK"
-    assert scene_service._decide([fine, fine]) == "HEALTHY"
+    assert scene_service._decide("bean_rust", 0.91) == "DISEASE"
+    assert scene_service._decide("healthy", 0.45) == "CHECK"          # 평균 점수 0.5 미만 → 사람 확인
+    assert scene_service._decide("healthy", 0.78) == "HEALTHY"
+    avg = scene_service._average([{"healthy": 0.9, "bean_rust": 0.1}, {"healthy": 0.5, "bean_rust": 0.5}])
+    assert avg[0] == {"label": "healthy", "score": 0.7}                 # 조각 확률 평균 → 사진 1장 결과 1개
 
 
 def test_v2_api(monkeypatch):
@@ -105,10 +104,10 @@ def test_v2_api(monkeypatch):
         far = client.post("/api/v2/classify/?draw=true", files={"image": ("far.png", to_png(far_image()), "image/png")})
         assert far.status_code == 200
         body = far.json()
-        assert body["mode"] == "far" and len(body["leaves"]) >= 3
-        assert body["decision"] == "HEALTHY" and body["image_jpg_base64"]
+        assert body["mode"] == "far" and body["parts"] >= 3 and "leaves" not in body   # 박스 · 잎별 결과는 내보내지 않음
+        assert body["label"] == "healthy" and body["decision"] == "HEALTHY" and body["image_jpg_base64"]
         close = client.post("/api/v2/classify/", files={"image": ("c.png", to_png(close_image()), "image/png")})
-        assert close.json()["mode"] == "close" and len(close.json()["leaves"]) == 1
+        assert close.json()["mode"] == "close" and close.json()["parts"] == 1
         assert client.post("/api/v2/classify/", files={"image": ("x.txt", b"bad", "text/plain")}).status_code == 400
         assert client.get("/api/sync/classify/").status_code == 405                      # v1 경로는 그대로
 
