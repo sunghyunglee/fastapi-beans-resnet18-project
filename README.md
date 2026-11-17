@@ -6,6 +6,8 @@
 
 </div>
 
+<p align="right"><b>한국어</b> | <a href="README.en.md">English</a></p>
+
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white" alt="Python 3.11"> <img src="https://img.shields.io/badge/PyTorch-GPU%20train%20%7C%202.5.1%20CPU%20serve-EE4C2C?logo=pytorch&logoColor=white" alt="PyTorch"> <img src="https://img.shields.io/badge/Transformers-ResNet--18-FFD21E?logo=huggingface&logoColor=black" alt="Transformers ResNet-18"> <img src="https://img.shields.io/badge/FastAPI-0.115%2B-009688?logo=fastapi&logoColor=white" alt="FastAPI 0.115+"> <img src="https://img.shields.io/badge/Celery-5.4%2B-37814A?logo=celery&logoColor=white" alt="Celery 5.4+"> <img src="https://img.shields.io/badge/Redis-7.4-DC382D?logo=redis&logoColor=white" alt="Redis 7.4"><br>
   <img src="https://img.shields.io/badge/PostgreSQL-17-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL 17"> <img src="https://img.shields.io/badge/Docker%20Compose-4%20services-2496ED?logo=docker&logoColor=white" alt="Docker Compose 4 services"> <img src="https://img.shields.io/badge/OpenCV-v2%20scene%20analysis-5C3EE8?logo=opencv&logoColor=white" alt="OpenCV v2 scene analysis"> <img src="https://img.shields.io/badge/NVIDIA-CUDA%20GPU%20train-76B900?logo=nvidia&logoColor=white" alt="NVIDIA CUDA"> <img src="https://img.shields.io/badge/Ubuntu-WSL2-E95420?logo=ubuntu&logoColor=white" alt="Ubuntu WSL2"> <img src="https://img.shields.io/badge/pytest-10%20passed-0A9EDC?logo=pytest&logoColor=white" alt="pytest 10 passed">
